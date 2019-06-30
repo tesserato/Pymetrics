@@ -1,4 +1,5 @@
 from pybtex.database import parse_file
+import pybtex
 import numpy as np
 import os
 import matplotlib.pyplot as plt
@@ -14,16 +15,17 @@ def save_csv(path, A, B, title_A, title_B):
     f.write(f"{a},{b}\n")
   f.close()
 
-filenames = [f for f in os.listdir() if ".bib" in f]
-
-'''
-check for repeated entries
-'''
+filenames = [f for f in os.listdir() if ".bib" in f[-4:]]
 
 for filename in filenames:
   path = './' + filename.replace(".bib","")
   os.makedirs(path, exist_ok=True)
   bib_data = parse_file(filename)
+
+
+
+
+
 
 ######## PUBLICATIONS PER YEAR    ########
   years = []
@@ -84,17 +86,15 @@ for filename in filenames:
   authors = []
   for k in bib_data.entries.keys():
     if "author" in bib_data.entries[k].persons.keys():
-      all_authors = bib_data.entries[k].fields["author"]
-      all_authors = all_authors.split("and")
-      for a in all_authors:
-        authors.append(a.strip())
+      for l in bib_data.entries[k].persons["author"]:
+        for i in range(len(l.first_names)):
+          authors.append(f"{l.first_names[i].strip()} {l.last_names[i].strip()}")
+
     elif "editor" in bib_data.entries[k].persons.keys():
-      all_authors = bib_data.entries[k].fields["editor"]
-      all_authors = all_authors.split("and")
-      for a in all_authors:
-        clean_a = a.strip()
-        clean_a = clean_a.replace(",", ";")
-        authors.append(clean_a)
+      for l in bib_data.entries[k].persons["editor"]:
+        for i in range(len(l.first_names)):
+          authors.append(f"{l.first_names[i].strip()} {l.last_names[i].strip()}")
+
   authors = np.array(authors, dtype=np.object)
   unique_elements, counts = np.unique(authors, return_counts=True)
   idxs = np.flip(np.argsort(counts))
